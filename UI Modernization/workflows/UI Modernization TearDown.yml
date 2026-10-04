@@ -1,0 +1,168 @@
+# This is a basic workflow to help you get started with Actions
+
+name: GoFileRoom UI Modernization TearDown
+on:
+  workflow_dispatch:
+    inputs:
+      OLDER_UI_USER_COUNT:
+        description: 'Keep This as 0, this is only for the Old UI Transactions'
+        required: true
+        default: '0'
+      NEW_UI_USER_COUNT:
+        description: 'These are the new UI Transactions keep as 0'
+        required: true
+        default: '0'
+      TearDown_USER_COUNT:
+        description: 'Only for the TearDown'
+        required: true
+        default: '1'
+      THINKTIME:
+        description: 'ThinkTime'
+        required: true
+        default: '10000'
+      RAMP_UP:
+        description: 'Ramp Up for all the users'
+        required: true
+        default: '60'
+      DURATION:
+        description: 'Duration of the test'
+        required: true
+        default: '3600'
+      
+    # schedule:
+   # - cron: '45 22 * * *' # Runs every day at 22:45 UTC (16:45 CST)
+  
+jobs:
+  jmeter-test:
+    runs-on: codebuild-a207804-GFRAPIv3-runner-linux-${{ github.run_id }}-${{ github.run_attempt }}
+
+    env:
+      DD_API_KEY: ${{ secrets.AWS_DD_APIKEY }}
+
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Debug - List files in working directory
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -l
+
+      - name: Set up JMeter and Plugins
+        run: |
+          wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xzf apache-jmeter-5.6.3.tgz
+          echo "JMETER_HOME=$PWD/apache-jmeter-5.6.3" >> $GITHUB_ENV
+          echo "$PWD/apache-jmeter-5.6.3/bin" >> $GITHUB_PATH
+
+          # Download required plugins
+          curl -o $PWD/apache-jmeter-5.6.3/lib/json-lib-2.4-jdk15.jar https://repo1.maven.org/maven2/net/sf/json-lib/json-lib/2.4/json-lib-2.4-jdk15.jar
+          curl -o $PWD/apache-jmeter-5.6.3/lib/jmeter-plugins-cmn-jmeter-0.7.jar https://repo1.maven.org/maven2/kg/apc/jmeter-plugins-cmn-jmeter/0.7/jmeter-plugins-cmn-jmeter-0.7.jar
+          curl -o $PWD/apache-jmeter-5.6.3/lib/jmeter-parallel-0.12.jar https://repo1.maven.org/maven2/com/blazemeter/jmeter-parallel/0.12/jmeter-parallel-0.12.jar
+          curl -o $PWD/apache-jmeter-5.6.3/lib/jmeter-plugins-casutg-2.10.jar https://repo1.maven.org/maven2/kg/apc/jmeter-plugins-casutg/2.10/jmeter-plugins-casutg-2.10.jar
+
+          # Download and set up PluginsManagerCMD
+          wget https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.2.1/cmdrunner-2.2.1.jar -O $PWD/apache-jmeter-5.6.3/lib/cmdrunner-2.2.jar
+          wget https://repo1.maven.org/maven2/kg/apc/jmeter-plugins-manager/1.6/jmeter-plugins-manager-1.6.jar -O $PWD/apache-jmeter-5.6.3/lib/ext/jmeter-plugins-manager.jar
+          java -cp "$PWD/apache-jmeter-5.6.3/lib/ext/jmeter-plugins-manager.jar:$PWD/apache-jmeter-5.6.3/lib/cmdrunner-2.2.jar" org.jmeterplugins.repository.PluginManagerCMDInstaller
+
+          # Install DataDog plugin
+          $PWD/apache-jmeter-5.6.3/bin/PluginsManagerCMD.sh install jmeter-datadog-backend-listener
+
+          # Install plugins required for JMeterPluginsCMD aggregate CSV report generation:
+          # jpgc-cmd  = provides JMeterPluginsCMD.sh
+          # jpgc-synthesis = provides the AggregateReport plugin type used by the reporter
+          $PWD/apache-jmeter-5.6.3/bin/PluginsManagerCMD.sh install jpgc-cmd,jpgc-synthesis
+
+          # Download additional plugins
+          curl -L https://github.com/OnkarWaman302/JTL-Rotating-Listener/releases/download/JTL/jmeter-plugins-rotating-listener-0.2.jar --output $PWD/apache-jmeter-5.6.3/lib/jmeter-plugins-rotating-listener-0.2.jar
+
+      - name: Run JMeter Test
+        run: |
+          # Set defaults if variables are empty (for scheduled runs)
+          OLDER_UI_USER_COUNT="${{ github.event.inputs.OLDER_UI_USER_COUNT }}"
+          NEW_UI_USER_COUNT="${{ github.event.inputs.NEW_UI_USER_COUNT }}"
+          TearDown_USER_COUNT="${{ github.event.inputs.TearDown_USER_COUNT }}"
+          THINKTIME="${{ github.event.inputs.THINKTIME }}"
+          RAMP_UP="${{ github.event.inputs.RAMP_UP }}"
+          DURATION="${{ github.event.inputs.DURATION }}"
+
+          # Use defaults if any are unset (for scheduled runs)
+          [ -z "$OLDER_UI_USER_COUNT" ] && OLDER_UI_USER_COUNT=0
+          [ -z "$NEW_UI_USER_COUNT" ] && NEW_UI_USER_COUNT=0
+          [ -z "$TearDown_USER_COUNT" ] && TearDown_USER_COUNT=1
+          [ -z "$THINKTIME" ] && THINKTIME=10000
+          [ -z "$RAMP_UP" ] && RAMP_UP=60
+          [ -z "$DURATION" ] && DURATION=3600
+          [ -z "$LOOPS" ] && LOOPS=1
+
+          JMETER_SCRIPT="UI Modernization/Users&Groups_v5.2.jmx"
+          JMETER_RESULT="result_UIModernization_TearDown.jtl"
+          JMETER_LOG="jmeter_UIModernization_TearDown.log"
+          JMETER=$PWD/apache-jmeter-5.6.3/bin/jmeter
+
+          # Set JVM memory parameters
+          export JVM_ARGS="-Xms5G -Xmx12G -XX:MaxMetaspaceSize=192m"
+
+          if [ ! -f "$JMETER_SCRIPT" ]; then
+            echo "ERROR: JMeter script $JMETER_SCRIPT not found!"
+            exit 1
+          fi
+
+          $JMETER \
+            -JapiKey="$DD_API_KEY" \
+            "-JOldUI_U&G_ActionUser=$OLDER_UI_USER_COUNT" \
+            "-JNewUI_U&G_ActionsUser=$NEW_UI_USER_COUNT" \
+            "-JTearDown_U&G_ActionsUser=$TearDown_USER_COUNT" \
+            -JThinkTime="$THINKTIME" \
+            -JRampupPeriod="$RAMP_UP" \
+            -JDuration="$DURATION" \
+            -Jn_Iterations="$LOOPS" \
+            -Jjmeter.save.saveservice.output_format=csv \
+            -Jjmeter.save.saveservice.response_data=false \
+            -Jjmeter.save.saveservice.samplerData=false \
+            -Jjmeter.save.saveservice.requestHeaders=false \
+            -Jjmeter.save.saveservice.responseHeaders=false \
+            -Jjmeter.save.saveservice.url=false \
+            -n -t "$JMETER_SCRIPT" \
+            -l "$JMETER_RESULT" \
+            -j "$JMETER_LOG"
+
+      - name: Generate Aggregate CSV Report
+        if: always()
+        run: |
+          JMETER_RESULT="result_API.jtl"
+          AGGREGATE_REPORT="aggregate_report_UIModernization_TearDown.csv"
+          PLUGINS_CMD=$PWD/apache-jmeter-5.6.3/bin/JMeterPluginsCMD.sh
+
+          if [ ! -f "$JMETER_RESULT" ]; then
+            echo "WARNING: JTL result file not found, skipping aggregate report generation."
+            exit 0
+          fi
+
+          echo "Generating aggregate CSV report from $JMETER_RESULT ..."
+          $PLUGINS_CMD \
+            --generate-csv "$AGGREGATE_REPORT" \
+            --input-jtl "$JMETER_RESULT" \
+            --plugin-type AggregateReport
+
+          echo "Aggregate report generated: $AGGREGATE_REPORT"
+
+      - name: Set timestamp (UTC)
+        id: timestamp
+        run: echo "stamp=$(date -u +'%Y-%m-%d_%H-%M-%S')" >> "$GITHUB_OUTPUT"
+        
+      - name: Upload JMeter Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Features-results-API-${{ steps.timestamp.outputs.stamp }}
+          path: |
+            jmeter_API.log
+            result_API.jtl
+            TestErrors_API.jtl
+            aggregate_report_API.csv
+          if-no-files-found: warn
