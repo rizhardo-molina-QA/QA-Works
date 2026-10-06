@@ -10,10 +10,9 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     
-    # 🛠️ Esto le avisa a GitHub que todos los comandos se deben ejecutar dentro de tu subcarpeta
     defaults:
       run:
-        working-directory: ./QA-Works
+        working-directory: ./Test Proyects
 
     steps:
     - name: Checkout Repository
@@ -31,7 +30,7 @@ jobs:
       run: npx playwright install --with-deps
 
     - name: Run Playwright Tests
-      run: npm test
+      run: npx playwright test --project=chromium
       env:
         CI: true
 
@@ -40,6 +39,5 @@ jobs:
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
-        # ⚠️ Apuntamos a la ruta del reporte dentro de tu subcarpeta
-        path: QA-Works/playwright-report/
+        path: Test Proyects/playwright-report/
         retention-days: 30
