@@ -10,7 +10,6 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     
-    # 🛠️ Le ordenamos a GitHub entrar a la carpeta donde realmente vive tu proyecto Node/Playwright
     defaults:
       run:
         working-directory: ./Test Proyects
@@ -31,7 +30,7 @@ jobs:
       run: npx playwright install --with-deps
 
     - name: Run Playwright Tests
-      run: npm test
+      run: npx playwright test
       env:
         CI: true
 
@@ -40,6 +39,5 @@ jobs:
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
-        # ⚠️ Guardamos el reporte apuntando a la ruta interna correcta
         path: Test Proyects/playwright-report/
         retention-days: 30
