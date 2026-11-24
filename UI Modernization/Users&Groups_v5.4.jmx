@@ -5,6 +5,8 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="New UIUser Defined Variables" enabled="false">
@@ -57595,7 +57597,7 @@ log.info(&quot;g_ID = &quot; + vars.get(&quot;g_ID&quot;))</stringProp>
           </hashTree>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GFR_Users&amp;Groups_NewUI_Q09-3">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GFR_Users&amp;Groups_NewUI_Q09-3" enabled="false">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">60</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -59048,11 +59050,11 @@ vars.put(&quot;c_decodedTokenID&quot;, decodedtokenID)</stringProp>
             </hashTree>
           </hashTree>
         </hashTree>
-        <RunTime guiclass="RunTimeGui" testclass="RunTime" testname="Manage Users &amp; Groups" enabled="true">
+        <RunTime guiclass="RunTimeGui" testclass="RunTime" testname="Manage Users &amp; Groups">
           <stringProp name="RunTime.seconds">3600</stringProp>
         </RunTime>
         <hashTree>
-          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="T10_OU_S02_ManageU&amp;G_ManageU&amp;G" enabled="true">
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="T10_OU_S02_ManageU&amp;G_ManageU&amp;G">
             <intProp name="ThroughputController.style">1</intProp>
             <boolProp name="ThroughputController.perThread">false</boolProp>
             <intProp name="ThroughputController.maxThroughput">1</intProp>
@@ -59468,7 +59470,7 @@ vars.put(&quot;c_decodedTokenID&quot;, decodedtokenID)</stringProp>
             </FloatProperty>
           </ThroughputController>
           <hashTree>
-            <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save" enabled="true">
+            <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save">
               <boolProp name="TransactionController.parent">true</boolProp>
               <boolProp name="TransactionController.includeTimers">false</boolProp>
             </TransactionController>
@@ -59628,7 +59630,7 @@ log.info(&quot;n_UserIDnew = &quot; + vars.get(&quot;n_UserIDnew&quot;))</string
                 </ResponseAssertion>
                 <hashTree/>
               </hashTree>
-              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/UserGroupSecurity/create-user?cid=null-1,561" enabled="true">
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/UserGroupSecurity/create-user?cid=null-1,561">
                 <stringProp name="HTTPSampler.domain">coreservice-qed.gofileroom.com</stringProp>
                 <stringProp name="HTTPSampler.port">443</stringProp>
                 <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
@@ -59795,7 +59797,7 @@ if (u_LoginCreate != null &amp;&amp; u_LoginCreate != &quot;u_LoginCreate_NOTFOU
                 </ResponseAssertion>
                 <hashTree/>
               </hashTree>
-              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/preference/user-preference-columns/00000001VX/1-1,568" enabled="true">
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/preference/user-preference-columns/00000001VX/1-1,568">
                 <stringProp name="HTTPSampler.domain">coreservice-qed.gofileroom.com</stringProp>
                 <stringProp name="HTTPSampler.port">443</stringProp>
                 <stringProp name="HTTPSampler.contentEncoding">utf-8</stringProp>
@@ -59900,7 +59902,7 @@ if (u_LoginCreate != null &amp;&amp; u_LoginCreate != &quot;u_LoginCreate_NOTFOU
                 </ResponseAssertion>
                 <hashTree/>
               </hashTree>
-              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/preference/user-preference-columns/00000001VX/1-1,570" enabled="true">
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/preference/user-preference-columns/00000001VX/1-1,570">
                 <stringProp name="HTTPSampler.domain">coreservice-qed.gofileroom.com</stringProp>
                 <stringProp name="HTTPSampler.port">443</stringProp>
                 <stringProp name="HTTPSampler.contentEncoding">utf-8</stringProp>
@@ -60005,7 +60007,7 @@ if (u_LoginCreate != null &amp;&amp; u_LoginCreate != &quot;u_LoginCreate_NOTFOU
                 </ResponseAssertion>
                 <hashTree/>
               </hashTree>
-              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/administration/gridUsers?cid=null-1,577" enabled="true">
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T10_OU_S03_ManageU&amp;G_SelectUser&amp;Save_Users&amp;Gr-User-ne-save/api/v1/administration/gridUsers?cid=null-1,577">
                 <stringProp name="HTTPSampler.domain">m-services-qed.gofileroom.com</stringProp>
                 <stringProp name="HTTPSampler.port">443</stringProp>
                 <stringProp name="HTTPSampler.contentEncoding">utf-8</stringProp>
@@ -68086,7 +68088,7 @@ log.info(&quot;g_ID = &quot; + vars.get(&quot;g_ID&quot;))</stringProp>
           </hashTree>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GFR_Users&amp;Groups_OldUI_QED" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GFR_Users&amp;Groups_OldUI_QED">
         <stringProp name="ThreadGroup.num_threads">${OldUI_U&amp;G_ActionUser}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">${RampupPeriod}</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -79906,7 +79908,7 @@ if (file.exists()) {
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
         <boolProp name="ResultCollector.error_logging">true</boolProp>
         <objProp>
           <name>saveConfig</name>
@@ -79941,7 +79943,7 @@ if (file.exists()) {
         <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
-      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
@@ -79978,7 +79980,7 @@ if (file.exists()) {
         <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
-      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>

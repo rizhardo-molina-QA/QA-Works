@@ -1,7 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
-import process from 'node:process';
 
 /// <reference types="node" />
+declare const process: {
+  env: Record<string, string | undefined>;
+};
 
 /**
  * Read environment variables from file.
