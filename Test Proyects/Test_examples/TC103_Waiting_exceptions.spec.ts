@@ -23,7 +23,6 @@ test('test', async ({ page }, testInfo) => {
   body: await page.screenshot(),
   contentType: 'image/png',});
   await expect(page.locator('#loading')).toContainText('Loading…');
-  
   await expect(page.locator('#rows')).toContainText('Row 2');
   await page.screenshot({ path: testInfo.outputPath('03-row2Box.png') });
   await testInfo.attach('03-row2Box', {

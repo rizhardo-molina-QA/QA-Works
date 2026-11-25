@@ -1,13 +1,19 @@
 name: Playwright Tests
 on:
   workflow_dispatch:
+    inputs:
+      duration_minutes:
+        description: "Minutos durante los que se repetirán las pruebas (1-60)"
+        required: true
+        default: 60
+        type: number
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -18,7 +24,36 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    - name: Repeat Playwright tests for the selected duration
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      env:
+        DURATION_MINUTES: ${{ inputs.duration_minutes }}
+      run: |
+        if ! [[ "$DURATION_MINUTES" =~ ^[0-9]+$ ]] || (( DURATION_MINUTES < 1 || DURATION_MINUTES > 60 )); then
+          echo "duration_minutes must be a whole number between 1 and 60."
+          exit 1
+        fi
+
+        duration_seconds=$((DURATION_MINUTES * 60))
+        start_time=$SECONDS
+        failed=0
+        iteration=0
+
+        while (( SECONDS - start_time < duration_seconds )); do
+          iteration=$((iteration + 1))
+          echo "Starting Playwright run #$iteration."
+          if ! npx playwright test; then
+            failed=1
+            echo "Playwright run #$iteration failed; continuing until the selected duration ends."
+          fi
+        done
+
+        if (( failed )); then
+          echo "At least one Playwright run failed."
+          exit 1
+        fi
     - name: Run Playwright tests
+      if: ${{ github.event_name != 'workflow_dispatch' }}
       run: npx playwright test
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
