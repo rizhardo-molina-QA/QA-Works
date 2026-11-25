@@ -3,15 +3,15 @@ on:
   workflow_dispatch:
     inputs:
       repeat_mode:
-        description: "Choose whether to repeat tests by time or by run count."
+        description: "Choose whether to repeat tests by time (up to 60 minutes) or by run count."
         required: true
         type: choice
         options:
-          - "Timer (minutes max 90)"
-          - "Run Count(Number of runs could not exceed the 90 minutes limit)"
+          - "Timer (minutes)"
+          - "Run Count"
         default: "Timer (minutes)"
       repeat_value:
-        description: "Enter minutes (1-90) for Timer, or the number of test runs for Run Count."
+        description: "Enter minutes (1-60) for Timer, or the number of test runs for Run Count."
         required: true
         default: 0
         type: number

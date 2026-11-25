@@ -47,6 +47,11 @@ test('test', async ({ page }, testInfo) => {
   await page.getByRole('link', { name: 'Active' }).click();
   await expect(page.getByRole('listitem').filter({ hasText: 'Review Pull Requests' }).getByLabel('Toggle Todo')).toBeHidden();
   await expect(page.locator('body')).toContainText('2 items left');
+  await page.getByRole('textbox', { name: 'What needs to be done?' }).click();
+  await page.getByRole('textbox', { name: 'What needs to be done?' }).fill('ABC');
+  await page.getByRole('textbox', { name: 'What needs to be done?' }).press('Enter');
+  await expect(page.locator('body')).toContainText('ABC');
+
   await page.screenshot({ path: testInfo.outputPath('05-2ItemsLeft.png') });
   await testInfo.attach('05-2ItemsLeft', {
   body: await page.screenshot(),
@@ -55,7 +60,7 @@ test('test', async ({ page }, testInfo) => {
   await page.getByRole('listitem').filter({ hasText: 'Investigate Failed Builds' }).hover();
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('link', { name: 'Active' }).click();
-  await expect(page.locator('body')).toContainText('1 item left');
+  await expect(page.locator('body')).toContainText('2 items left');
   await page.screenshot({ path: testInfo.outputPath('06-1ItemLeft.png') });
   await testInfo.attach('06-1ItemLeft', {
   body: await page.screenshot(),
