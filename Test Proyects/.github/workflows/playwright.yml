@@ -2,8 +2,16 @@ name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
-      duration_minutes:
-        description: "Minutos durante los que se repetirán las pruebas (1-60)"
+      repeat_mode:
+        description: "Choose whether to repeat by time or by run count."
+        required: true
+        type: choice
+        options:
+          - timer
+          - count
+        default: timer
+      repeat_value:
+        description: "Minutes (1-60) for timer mode, or number of runs for count mode."
         required: true
         default: 60
         type: number
@@ -24,29 +32,52 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
-    - name: Repeat Playwright tests for the selected duration
+    - name: Repeat Playwright tests by timer or run count
       if: ${{ github.event_name == 'workflow_dispatch' }}
       env:
-        DURATION_MINUTES: ${{ inputs.duration_minutes }}
+        REPEAT_MODE: ${{ inputs.repeat_mode }}
+        REPEAT_VALUE: ${{ inputs.repeat_value }}
       run: |
-        if ! [[ "$DURATION_MINUTES" =~ ^[0-9]+$ ]] || (( DURATION_MINUTES < 1 || DURATION_MINUTES > 60 )); then
-          echo "duration_minutes must be a whole number between 1 and 60."
+        if ! [[ "$REPEAT_VALUE" =~ ^[1-9][0-9]*$ ]]; then
+          echo "repeat_value must be a positive whole number."
           exit 1
         fi
 
-        duration_seconds=$((DURATION_MINUTES * 60))
-        start_time=$SECONDS
         failed=0
         iteration=0
 
-        while (( SECONDS - start_time < duration_seconds )); do
-          iteration=$((iteration + 1))
-          echo "Starting Playwright run #$iteration."
-          if ! npx playwright test; then
-            failed=1
-            echo "Playwright run #$iteration failed; continuing until the selected duration ends."
-          fi
-        done
+        case "$REPEAT_MODE" in
+          timer)
+            if (( REPEAT_VALUE > 60 )); then
+              echo "Timer mode accepts a maximum of 60 minutes."
+              exit 1
+            fi
+
+            duration_seconds=$((REPEAT_VALUE * 60))
+            start_time=$SECONDS
+            while (( SECONDS - start_time < duration_seconds )); do
+              iteration=$((iteration + 1))
+              echo "Starting Playwright run #$iteration."
+              if ! npx playwright test; then
+                failed=1
+                echo "Playwright run #$iteration failed; continuing until the timer ends."
+              fi
+            done
+            ;;
+          count)
+            for ((iteration = 1; iteration <= REPEAT_VALUE; iteration++)); do
+              echo "Starting Playwright run #$iteration of $REPEAT_VALUE."
+              if ! npx playwright test; then
+                failed=1
+                echo "Playwright run #$iteration failed; continuing with the remaining runs."
+              fi
+            done
+            ;;
+          *)
+            echo "repeat_mode must be timer or count."
+            exit 1
+            ;;
+        esac
 
         if (( failed )); then
           echo "At least one Playwright run failed."
