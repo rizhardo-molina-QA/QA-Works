@@ -1,6 +1,20 @@
 name: Playwright E2E Tests
 on:
   workflow_dispatch:
+    inputs:
+      repeat_mode:
+        description: "Elige si repetir por tiempo o por cantidad de ejecuciones."
+        required: true
+        type: choice
+        options:
+          - "Tiempo (minutos)"
+          - "Número de ejecuciones"
+        default: "Tiempo (minutos)"
+      repeat_value:
+        description: "Minutos (1-60) o cantidad de ejecuciones, según la opción anterior."
+        required: true
+        default: 60
+        type: number
   push:
     branches: [ main, master ]
   pull_request:
@@ -8,7 +22,7 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     
     defaults:
@@ -30,7 +44,61 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
+    - name: Repeat Playwright Tests by Timer or Run Count
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      run: |
+        if ! [[ "$REPEAT_VALUE" =~ ^[1-9][0-9]*$ ]]; then
+          echo "repeat_value must be a positive whole number."
+          exit 1
+        fi
+
+        failed=0
+        iteration=0
+
+        case "$REPEAT_MODE" in
+          "Tiempo (minutos)")
+            if (( REPEAT_VALUE > 60 )); then
+              echo "Timer mode accepts a maximum of 60 minutes."
+              exit 1
+            fi
+
+            duration_seconds=$((REPEAT_VALUE * 60))
+            start_time=$SECONDS
+            while (( SECONDS - start_time < duration_seconds )); do
+              iteration=$((iteration + 1))
+              echo "Starting Playwright run #$iteration."
+              if ! npx playwright test; then
+                failed=1
+                echo "Playwright run #$iteration failed; continuing until the timer ends."
+              fi
+            done
+            ;;
+          "Número de ejecuciones")
+            for ((iteration = 1; iteration <= REPEAT_VALUE; iteration++)); do
+              echo "Starting Playwright run #$iteration of $REPEAT_VALUE."
+              if ! npx playwright test; then
+                failed=1
+                echo "Playwright run #$iteration failed; continuing with the remaining runs."
+              fi
+            done
+            ;;
+          *)
+            echo "Selecciona un modo de repetición válido."
+            exit 1
+            ;;
+        esac
+
+        if (( failed )); then
+          echo "At least one Playwright run failed."
+          exit 1
+        fi
+      env:
+        CI: true
+        REPEAT_MODE: ${{ inputs.repeat_mode }}
+        REPEAT_VALUE: ${{ inputs.repeat_value }}
+
     - name: Run Playwright Tests
+      if: ${{ github.event_name != 'workflow_dispatch' }}
       run: npx playwright test
       env:
         CI: true
