@@ -3,15 +3,15 @@ on:
   workflow_dispatch:
     inputs:
       repeat_mode:
-        description: "Elige si repetir por tiempo o por cantidad de ejecuciones."
+        description: "Chose Timer (minutes) or Run Count for repeating the Playwright tests."
         required: true
         type: choice
         options:
-          - "Tiempo (minutos)"
-          - "Número de ejecuciones"
-        default: "Tiempo (minutos)"
+          - "Timer (minutes)"
+          - "Run Count"
+        default: "Timer (minutes)"
       repeat_value:
-        description: "Minutos (1-60) o cantidad de ejecuciones, según la opción anterior."
+        description: "Minutes (1-60) or run count, depending on the previous options."
         required: true
         default: 60
         type: number
