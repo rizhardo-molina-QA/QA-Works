@@ -7,13 +7,13 @@ on:
         required: true
         type: choice
         options:
-          - "Timer (minutes)"
-          - "Run Count"
+          - "Timer (minutes max 90)"
+          - "Run Count(Number of runs could not exceed the 90 minutes limit)"
         default: "Timer (minutes)"
       repeat_value:
-        description: "Enter minutes (1-60) for Timer, or the number of test runs for Run Count."
+        description: "Enter minutes (1-90) for Timer, or the number of test runs for Run Count."
         required: true
-        default: 60
+        default: 0
         type: number
   push:
     branches: [ main, master ]
@@ -22,7 +22,7 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 90
+    timeout-minutes: 180
     runs-on: ubuntu-latest
     
     defaults:
