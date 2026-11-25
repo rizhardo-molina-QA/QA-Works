@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       repeat_mode:
-        description: "Chose Timer (minutes) or Run Count for repeating the Playwright tests."
+        description: "Choose whether to repeat tests by time or by run count."
         required: true
         type: choice
         options:
@@ -11,7 +11,7 @@ on:
           - "Run Count"
         default: "Timer (minutes)"
       repeat_value:
-        description: "Minutes (1-60) or run count, depending on the previous options."
+        description: "Enter minutes (1-60) for Timer, or the number of test runs for Run Count."
         required: true
         default: 60
         type: number
@@ -56,7 +56,7 @@ jobs:
         iteration=0
 
         case "$REPEAT_MODE" in
-          "Tiempo (minutos)")
+          "Timer (minutes)"|timer|Timer)
             if (( REPEAT_VALUE > 60 )); then
               echo "Timer mode accepts a maximum of 60 minutes."
               exit 1
@@ -73,7 +73,7 @@ jobs:
               fi
             done
             ;;
-          "Número de ejecuciones")
+          "Run Count"|count|Count)
             for ((iteration = 1; iteration <= REPEAT_VALUE; iteration++)); do
               echo "Starting Playwright run #$iteration of $REPEAT_VALUE."
               if ! npx playwright test; then
@@ -83,7 +83,7 @@ jobs:
             done
             ;;
           *)
-            echo "Selecciona un modo de repetición válido."
+            echo "Select a valid repeat mode."
             exit 1
             ;;
         esac
